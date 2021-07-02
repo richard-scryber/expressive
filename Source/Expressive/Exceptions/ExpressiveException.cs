@@ -5,7 +5,7 @@ namespace Expressive.Exceptions
     /// <summary>
     /// The main exposed <see cref="Exception"/> for users of an Expression. Check the InnerException for more information.
     /// </summary>
-#if !NETSTANDARD1_4
+#if NET45
     [Serializable]
 #endif
     public sealed class ExpressiveException : Exception

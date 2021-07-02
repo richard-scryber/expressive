@@ -1,6 +1,6 @@
 ﻿using System;
 
-#if !NETSTANDARD1_4
+#if NET45
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 #endif
@@ -10,7 +10,7 @@ namespace Expressive.Exceptions
     /// <summary>
     /// Represents an error that is thrown when a token is not recognised inside an <see cref="Expression"/>.
     /// </summary>
-#if !NETSTANDARD1_4
+#if NET45
     [Serializable]
 #endif
     public sealed class UnrecognisedTokenException : Exception
@@ -30,7 +30,7 @@ namespace Expressive.Exceptions
             this.Token = token;
         }
 
-#if !NETSTANDARD1_4
+#if NET45
         /// <summary>
         /// Set the <see cref="SerializationInfo"/> with information about this exception.
         /// </summary>

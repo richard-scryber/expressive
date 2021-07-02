@@ -1,7 +1,7 @@
 ﻿using System;
 using Expressive.Operators;
 
-#if !NETSTANDARD1_4
+#if NET45
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 #endif
@@ -11,7 +11,7 @@ namespace Expressive.Exceptions
     /// <summary>
     /// Represents an error that is thrown when registering an <see cref="IOperator"/> and the name is already used.
     /// </summary>
-#if !NETSTANDARD1_4
+#if NET45
     [Serializable]
 #endif
     public sealed class OperatorNameAlreadyRegisteredException : Exception
@@ -31,7 +31,7 @@ namespace Expressive.Exceptions
             this.Tag = tag;
         }
 
-#if !NETSTANDARD1_4
+#if NET45
         /// <summary>
         /// Set the <see cref="SerializationInfo"/> with information about this exception.
         /// </summary>
