@@ -32,7 +32,7 @@ namespace Expressive
     /// <summary>
     /// Class definition for an Expression that can be evaluated.
     /// </summary>
-    public sealed class Expression : IExpression
+    public class Expression : IExpression
     {
         #region Fields
 
@@ -59,6 +59,14 @@ namespace Expressive
             }
         }
 
+        /// <summary>
+        /// Gets the current context for the expression evaluation
+        /// </summary>
+        public Context ExpressionContext
+        {
+            get { return this.context; }
+        }
+
         #endregion
 
         #region Constructors
@@ -68,7 +76,8 @@ namespace Expressive
         /// </summary>
         /// <param name="expression">The expression to be evaluated.</param>
         /// <param name="options">The <see cref="ExpressiveOptions"/> to use when evaluating.</param>
-        public Expression(string expression, ExpressiveOptions options = ExpressiveOptions.None) : this(expression, new Context(options))
+        public Expression(string expression, ExpressiveOptions options = ExpressiveOptions.None)
+            : this(expression, new Context(options))
         {
         }
 
@@ -78,12 +87,23 @@ namespace Expressive
         /// <param name="expression">The expression to be evaluated.</param>
         /// <param name="context">The <see cref="Context"/> to use when evaluating.</param>
         public Expression(string expression, Context context)
+            : this(expression, new ExpressionParser(context), context)
+        {
+            
+        }
+
+        public Expression(string expression, ExpressionParser parser, ExpressiveOptions options = ExpressiveOptions.None)
+            : this(expression, parser, new Context(options))
+        {
+
+        }
+
+        public Expression(string expression, ExpressionParser parser, Context context)
         {
             this.originalExpression = expression;
             this.context = context ?? throw new ArgumentNullException(nameof(context));
-            this.parser = new ExpressionParser(this.context);
+            this.parser = parser ?? throw new ArgumentNullException(nameof(parser));
         }
-
         #endregion
 
         #region Public Methods
@@ -118,7 +138,8 @@ namespace Expressive
         {
             try
             {
-                return (T)this.Evaluate(variables);
+                object value = this.Evaluate(variables);
+                return (T)Convert.ChangeType(value, typeof(T));
             }
             catch (ExpressiveException)
             {
@@ -296,6 +317,15 @@ namespace Expressive
                 default:
                     return new Dictionary<string, object>(variables, desiredStringComparer);
             }
+        }
+
+        #endregion
+
+        #region object overrides
+
+        public override string ToString()
+        {
+            return "{" + this.originalExpression + "}";
         }
 
         #endregion

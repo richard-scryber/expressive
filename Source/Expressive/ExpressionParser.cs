@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Expressive.Tokenisation;
+using System.Reflection.Metadata;
 
 namespace Expressive
 {
-    internal sealed class ExpressionParser
+    public class ExpressionParser
     {
         #region Fields
 
@@ -20,43 +21,70 @@ namespace Expressive
 
         #region Constructors
 
-        internal ExpressionParser(Context context)
+        public ExpressionParser(Context context)
+            : this(context, GetDefaultTokenExtractors(context))
+        {
+        }
+
+        public ExpressionParser(Context context, List<ITokenExtractor> tokenExtractors)
+            : this(context, new Tokeniser(context, tokenExtractors))
+        { }
+
+
+        public ExpressionParser(Context context, Tokeniser tokeniser)
         {
             this.context = context;
-            this.tokeniser = new Tokeniser(
-                this.context,
-                new List<ITokenExtractor>
+            this.tokeniser = tokeniser;
+        }
+
+        public static List<ITokenExtractor> GetDefaultTokenExtractors(Context context)
+        {
+            if (null == context)
+            {
+                throw new NullReferenceException(nameof(context));
+            }
+            return new List<ITokenExtractor>
                 {
-                    new KeywordTokenExtractor(this.context.FunctionNames),
-                    new KeywordTokenExtractor(this.context.OperatorNames),
+                    new KeywordTokenExtractor(context.FunctionNames),
+                    new OperatorTokenExtractor(context.OperatorNames),
                     // Variables
                     new ParenthesisedTokenExtractor('[', ']'),
                     new NumericTokenExtractor(),
+                    new ValueTokenExtractor("."),
                     // Dates
                     new ParenthesisedTokenExtractor('#'),
                     new ValueTokenExtractor(","),
                     new ParenthesisedTokenExtractor('"'),
-                    new ParenthesisedTokenExtractor('\''),
+                    new ParenthesisedTokenExtractor('\''),      
                     // TODO: Probably a better way to achieve this.
                     new ValueTokenExtractor("true"),
                     new ValueTokenExtractor("TRUE"),
                     new ValueTokenExtractor("false"),
                     new ValueTokenExtractor("FALSE"),
                     new ValueTokenExtractor("null"),
-                    new ValueTokenExtractor("NULL")
-                });
+                    new ValueTokenExtractor("NULL"),
+                    new VariableTokenExtractor()
+                } ;
         }
+
 
         #endregion
 
-        #region Internal Methods
+        #region Public Methods
 
-        internal IExpression CompileExpression(string expression, IList<string> variables)
+        public IExpression CompileExpression(string expression, IList<string> variables)
         {
             if (string.IsNullOrWhiteSpace(expression))
             {
                 throw new ExpressiveException("An Expression cannot be empty.");
             }
+
+            if(null == variables)
+            {
+                throw new ArgumentNullException(nameof(variables));
+            }
+            
+                
 
             var tokens = this.tokeniser.Tokenise(expression);
 
@@ -212,16 +240,35 @@ namespace Expressive
                 }
                 else if (currentToken.CurrentToken.StartsWith("[") && currentToken.CurrentToken.EndsWith("]")) // or a variable?
                 {
-                    CheckForExistingParticipant(leftHandSide, currentToken, isWithinFunction);
-
                     tokens.Dequeue();
                     var variableName = currentToken.CurrentToken.Replace("[", "").Replace("]", "");
-                    leftHandSide = new VariableExpression(variableName);
+
+
+                    CheckForExistingParticipant(leftHandSide, currentToken, isWithinFunction);
+
+                    leftHandSide = CreateVariableExpression(variableName, this.context);
 
                     if (!variables.Contains(variableName, this.context.ParsingStringComparer))
                     {
                         variables.Add(variableName);
                     }
+
+                }
+                else if (currentToken.CurrentToken.StartsWith("{") && currentToken.CurrentToken.EndsWith("}")) // or a variable?
+                {
+                    tokens.Dequeue();
+                    var variableName = currentToken.CurrentToken.Replace("{", "").Replace("}", "");
+
+
+                    CheckForExistingParticipant(leftHandSide, currentToken, isWithinFunction);
+
+                    leftHandSide = CreateVariableExpression(variableName, this.context);
+
+                    if (!variables.Contains(variableName, this.context.ParsingStringComparer))
+                    {
+                        variables.Add(variableName);
+                    }
+
                 }
                 else if (string.Equals(currentToken.CurrentToken, "true", StringComparison.OrdinalIgnoreCase)) // or a boolean?
                 {
@@ -283,7 +330,7 @@ namespace Expressive
                 {
                     if (!isWithinFunction)
                     {
-                        throw new ExpressiveException($"Unexpected token '{currentToken}'");
+                        throw new ExpressiveException("Unexpected parameter separator token '" + Context.ParameterSeparator + "' or unnrecognised outer function.");
                     }
                     tokens.Dequeue();
                 }
@@ -300,6 +347,8 @@ namespace Expressive
 
             return leftHandSide;
         }
+
+        
 
         private static string CleanString(string input)
         {
@@ -351,6 +400,13 @@ namespace Expressive
 
             return new string(buffer, 0, outIdx);
         }
+
+        protected virtual IExpression CreateVariableExpression(string token, Context context)
+        {
+            return new VariableExpression(token);
+        }
+
+        
 
         private static void CheckForExistingParticipant(IExpression participant, Token token, bool isWithinFunction)
         {

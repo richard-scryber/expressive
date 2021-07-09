@@ -7,7 +7,7 @@ namespace Expressive
     /// <summary>
     /// A 'simple' wrapper around <see cref="IVariableProvider"/> to allow for it to be used as a dictionary lookup.
     /// </summary>
-    internal class VariableProviderDictionary : IDictionary<string, object>
+    public class VariableProviderDictionary : IDictionary<string, object>
     {
         private readonly IVariableProvider variableProvider;
 

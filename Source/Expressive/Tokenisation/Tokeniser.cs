@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Expressive.Tokenisation
 {
-    internal sealed class Tokeniser
+    public class Tokeniser
     {
         #region Fields
 
@@ -25,7 +25,7 @@ namespace Expressive.Tokenisation
 
         #region Internal Methods
 
-        internal IList<Token> Tokenise(string expression)
+        public IList<Token> Tokenise(string expression)
         {
             if (string.IsNullOrWhiteSpace(expression))
             {

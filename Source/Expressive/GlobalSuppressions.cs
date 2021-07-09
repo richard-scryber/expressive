@@ -10,3 +10,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Globalization", "CA1307:Specify StringComparison", Justification = "To be reviewed in due course")]
 [assembly: SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "To be reviewed in due course")]
 [assembly: SuppressMessage("Usage", "CA2229:Implement serialization constructors", Justification = "To be reviewed in due course")]
+[assembly: SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>", Scope = "member", Target = "~M:Expressive.Operators.Reflective.IndexOpenOperator.BuildExpression(Expressive.Token,Expressive.Expressions.IExpression[],Expressive.Context)~Expressive.Expressions.IExpression")]
+[assembly: SuppressMessage("Design", "CA1062:Validate arguments of public methods", Justification = "<Pending>", Scope = "member", Target = "~M:Expressive.Operators.Reflective.IndexOpenOperator.CanGetCaptiveTokens(Expressive.Token,Expressive.Token,System.Collections.Generic.Queue{Expressive.Token})~System.Boolean")]

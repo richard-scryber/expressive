@@ -5,7 +5,7 @@ namespace Expressive.Expressions
 {
     internal class VariableExpression : IExpression
     {
-        private readonly string variableName;
+        public readonly string variableName;
 
         internal VariableExpression(string variableName)
         {

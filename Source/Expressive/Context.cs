@@ -32,6 +32,8 @@ namespace Expressive
         internal const char DateSeparator = '#';
         internal const char ParameterSeparator = ',';
 
+        internal const string CurrentDataVariableName = "{current}";
+
         #region Fields
 
         // TODO: Perhaps this knowledge is better held under specific expression compilers? Or is that a level too far?
@@ -41,6 +43,11 @@ namespace Expressive
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Gets or sets the data associate with the current data context
+        /// </summary>
+        public object CurrentDataContext { get; set; }
 
         internal ExpressiveOptions Options { get; }
 
@@ -122,6 +129,9 @@ namespace Expressive
             // Grouping
             this.RegisterOperator(new ParenthesisCloseOperator());
             this.RegisterOperator(new ParenthesisOpenOperator());
+            this.RegisterOperator(new IndexOpenOperator());
+            this.RegisterOperator(new IndexCloseOperator());
+            this.RegisterOperator(new PropertyOperator());
             // Logic
             this.RegisterOperator(new AndOperator());
             this.RegisterOperator(new NotOperator());
@@ -137,6 +147,7 @@ namespace Expressive
             this.RegisterOperator(new LessThanOperator());
             this.RegisterOperator(new LessThanOrEqualOperator());
             this.RegisterOperator(new NotEqualOperator());
+            
             #endregion
 
             #region Functions

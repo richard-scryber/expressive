@@ -25,7 +25,7 @@ namespace Expressive.Tokenisation
             {
                 var lookAhead = expression.Substring(currentIndex, Math.Min(possibleName.Length, expressionLength - currentIndex));
 
-                if (!string.Equals(lookAhead, possibleName, context.ParsingStringComparison))
+                if (!string.Equals(lookAhead, possibleName, context.ParsingStringComparison) || HasContinuationCharacter(expression,possibleName, currentIndex))
                 {
                     continue;
                 }
@@ -34,6 +34,18 @@ namespace Expressive.Tokenisation
             }
 
             return null;
+        }
+
+        //Checks to see if the next character in the string continues a name beyond possible name (e.g. model and mode)
+        private bool HasContinuationCharacter(string expression, string possibleName, int currentIndex)
+        {
+            if (expression.Length == possibleName.Length + currentIndex)
+                return false;
+            char c = expression[possibleName.Length + currentIndex]; // character after
+            if (char.IsLetterOrDigit(c) || c == '_')
+                return true;
+            else
+                return false;
         }
     }
 }
